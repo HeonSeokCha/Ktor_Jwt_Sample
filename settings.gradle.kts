@@ -1,0 +1,1 @@
+rootProject.name = "com.chs.ktor-jwt-auth"
