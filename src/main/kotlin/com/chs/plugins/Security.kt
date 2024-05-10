@@ -1,27 +1,29 @@
 package com.chs.plugins
 
+import com.chs.service.JwtService
+import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.chs.security.token.TokenConfig
-import io.ktor.server.application.*
 
-fun Application.configureSecurity(config: TokenConfig) {
+fun Application.configureSecurity(
+    jwtService: JwtService
+) {
     authentication {
         jwt {
-            realm = this@configureSecurity.environment.config.property("jwt.realm").getString()
-            verifier(
-                JWT
-                    .require(Algorithm.HMAC256(config.secret))
-                    .withAudience(config.audience)
-                    .withIssuer(config.issuer)
-                    .build()
-            )
+            realm = jwtService.realm
+            verifier(jwtService.jwtVerifier)
+
             validate { credential ->
-                if (credential.payload.audience.contains(config.audience)) {
-                    JWTPrincipal(credential.payload)
-                } else null
+                jwtService.customValidator(credential)
+            }
+        }
+
+        jwt("another-auth") {
+            realm = jwtService.realm
+            verifier(jwtService.jwtVerifier)
+
+            validate { credential ->
+                jwtService.customValidator(credential)
             }
         }
     }
