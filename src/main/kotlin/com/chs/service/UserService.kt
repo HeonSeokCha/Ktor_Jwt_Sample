@@ -15,7 +15,7 @@ class UserService(
 
     fun getAllUsers(): List<UserInfo> = userRepository.getAll()
 
-    fun findByUsername(userId: String): UserInfo? =
+    fun findByUserId(userId: String): UserInfo? =
         userRepository.findByUserId(userId)
 
     fun save(user: UserInfo): UserInfo? {
@@ -28,21 +28,20 @@ class UserService(
     }
 
     fun authenticate(loginRequest: RequestLogin): ResponseLogin? {
-        val username = loginRequest.userId
-        val foundUser: UserInfo? = userRepository.findByUserId(username)
+        val userId = loginRequest.userId
+        val foundUser: UserInfo? = userRepository.findByUserId(userId)
 
         return if (foundUser != null && loginRequest.password == foundUser.userPassword) {
-            val accessToken = jwtService.createAccessToken(username)
-            val refreshToken = jwtService.createRefreshToken(username)
+            val accessToken = jwtService.createAccessToken(userId)
+            val refreshToken = jwtService.createRefreshToken(userId)
 
-            refreshTokenRepository.saveUserToken(refreshToken, username)
+            refreshTokenRepository.saveUserToken(refreshToken, userId)
 
             ResponseLogin(
                 accessToken = accessToken,
                 refreshToken = refreshToken
             )
-        } else
-            null
+        } else null
     }
 
     fun refreshToken(token: String): String? {
@@ -53,22 +52,20 @@ class UserService(
             val foundUser: UserInfo? = userRepository.findByUserId(persistedUserId)
             val usernameFromRefreshToken: String? = decodedRefreshToken.getClaim("userId").asString()
 
-            if (foundUser != null && usernameFromRefreshToken == foundUser.userId)
+            if (foundUser != null && usernameFromRefreshToken == foundUser.userId) {
                 jwtService.createAccessToken(persistedUserId)
-            else
-                null
-        } else
-            null
+            } else null
+        } else  null
     }
 
     private fun verifyRefreshToken(token: String): DecodedJWT? {
 
         return getDecodedJwt(token).run {
-            if (this == null) return null
+            if (this == null) return@run null
 
             val audienceMatches = jwtService.audienceMatches(this.audience.first())
 
-            if (audienceMatches) this else null
+            return@run if (audienceMatches) this else null
         }
     }
 

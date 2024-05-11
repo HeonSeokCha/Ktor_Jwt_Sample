@@ -29,17 +29,20 @@ class JwtService(
             .withIssuer(issuer)
             .build()
 
-    fun createAccessToken(username: String): String =
-        createJwtToken(username, 1.hours.inWholeMilliseconds.toInt())
+    fun createAccessToken(userId: String): String =
+        createJwtToken(userId, 1.hours.inWholeMilliseconds.toInt())
 
-    fun createRefreshToken(username: String): String =
-        createJwtToken(username, 1.days.inWholeMilliseconds.toInt())
+    fun createRefreshToken(userId: String): String =
+        createJwtToken(userId, 1.days.inWholeMilliseconds.toInt())
 
-    private fun createJwtToken(username: String, expireIn: Int): String =
+    private fun createJwtToken(
+        userId: String,
+        expireIn: Int
+    ): String =
         JWT.create()
             .withAudience(audience)
             .withIssuer(issuer)
-            .withClaim("userId", username)
+            .withClaim("userId", userId)
             .withExpiresAt(Date(System.currentTimeMillis() + expireIn))
             .sign(Algorithm.HMAC256(secret))
 

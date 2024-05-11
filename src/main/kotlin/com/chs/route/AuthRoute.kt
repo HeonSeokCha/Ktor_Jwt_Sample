@@ -15,6 +15,10 @@ import kotlinx.coroutines.sync.withLock
 
 fun Route.authRoute(userService: UserService) {
 
+    get {
+        call.respond("TEST")
+    }
+
     post {
         val loginRequest = call.receive<RequestLogin>()
 
