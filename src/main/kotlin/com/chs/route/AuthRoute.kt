@@ -3,6 +3,7 @@ package com.chs.route
 import com.chs.data.request.RequestAccessToken
 import com.chs.data.request.RequestLogin
 import com.chs.data.responses.ResponseAccessToken
+import com.chs.data.responses.ResponseBase
 import com.chs.data.responses.ResponseLogin
 import com.chs.service.UserService
 import io.ktor.http.*
@@ -15,10 +16,6 @@ import kotlinx.coroutines.sync.withLock
 
 fun Route.authRoute(userService: UserService) {
 
-    get {
-        call.respond("TEST")
-    }
-
     post {
         val loginRequest = call.receive<RequestLogin>()
 
@@ -27,7 +24,10 @@ fun Route.authRoute(userService: UserService) {
         authResponse?.let {
             call.respond(authResponse)
         } ?: call.respond(
-            message = HttpStatusCode.Unauthorized
+            ResponseBase(
+                code = HttpStatusCode.BadRequest.value,
+                message = "Not Correct UserInfo."
+            )
         )
     }
 
@@ -41,7 +41,10 @@ fun Route.authRoute(userService: UserService) {
                 ResponseAccessToken(it)
             )
         } ?: call.respond(
-            message = HttpStatusCode.Unauthorized
+            ResponseBase(
+                code = HttpStatusCode.Unauthorized.value,
+                message = "You're UnAuthorized."
+            )
         )
     }
 }

@@ -10,6 +10,7 @@ import io.ktor.server.auth.jwt.*
 import java.util.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 
 class JwtService(
@@ -22,15 +23,14 @@ class JwtService(
 
     val realm = getConfigProperty("jwt.realm")
 
-    val jwtVerifier: JWTVerifier =
-        JWT
-            .require(Algorithm.HMAC256(secret))
-            .withAudience(audience)
-            .withIssuer(issuer)
-            .build()
+    val jwtVerifier: JWTVerifier = JWT
+        .require(Algorithm.HMAC256(secret))
+        .withAudience(audience)
+        .withIssuer(issuer)
+        .build()
 
     fun createAccessToken(userId: String): String =
-        createJwtToken(userId, 1.hours.inWholeMilliseconds.toInt())
+        createJwtToken(userId, 1.minutes.inWholeMilliseconds.toInt())
 
     fun createRefreshToken(userId: String): String =
         createJwtToken(userId, 1.days.inWholeMilliseconds.toInt())
